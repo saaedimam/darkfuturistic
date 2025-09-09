@@ -1,0 +1,22 @@
+{
+  "name": "StitchOS - Industrial Textile Software",
+  "short_name": "StitchOS",
+  "description": "Premium SaaS platform for textile manufacturing",
+  "icons": [
+    {
+      "src": "/apple-touch-icon.jpg",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "32x32",
+      "type": "image/x-icon"
+    }
+  ],
+  "theme_color": "#0B1F3A",
+  "background_color": "#FFFFFF",
+  "display": "standalone",
+  "start_url": "/",
+  "scope": "/"
+}
