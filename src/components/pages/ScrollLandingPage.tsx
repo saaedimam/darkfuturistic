@@ -17,8 +17,13 @@ export function ScrollLandingPage({ onNavigate }: ScrollLandingPageProps) {
   const parallaxOffset = useParallax()
   const [activeSection, setActiveSection] = useState("hero")
   const [portfolioItems, setPortfolioItems] = useState(6)
+  const [isClient, setIsClient] = useState(false)
   const featureRefs = Array.from({ length: 4 }, () => React.createRef<HTMLDivElement>())
   const testimonialRefs = Array.from({ length: 3 }, () => React.createRef<HTMLDivElement>())
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   // Scroll to section function
   const scrollToSection = (sectionId: string) => {
@@ -30,6 +35,8 @@ export function ScrollLandingPage({ onNavigate }: ScrollLandingPageProps) {
 
   // Infinite scroll for portfolio
   useEffect(() => {
+    if (!isClient) return
+
     const handleScroll = () => {
       const portfolioSection = document.getElementById("portfolio")
       if (portfolioSection) {
@@ -42,10 +49,12 @@ export function ScrollLandingPage({ onNavigate }: ScrollLandingPageProps) {
 
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+  }, [isClient])
 
   // Track active section based on scroll position
   useEffect(() => {
+    if (!isClient) return
+
     const handleScroll = () => {
       const sections = ["hero", "features", "timeline", "portfolio", "testimonials"]
       const currentSection = sections.find((section) => {
@@ -63,7 +72,7 @@ export function ScrollLandingPage({ onNavigate }: ScrollLandingPageProps) {
 
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+  }, [isClient])
 
   // Navigation sections
   const navSections = [
@@ -250,7 +259,8 @@ export function ScrollLandingPage({ onNavigate }: ScrollLandingPageProps) {
               },
               { icon: Target, title: "Precision Tools", description: "Purpose-built tools for maximum productivity" },
             ].map((feature, index) => {
-              const isVisible = featureRefs[index].current?.getBoundingClientRect().top <= window.innerHeight + 200
+              const isVisible =
+                isClient && featureRefs[index].current?.getBoundingClientRect().top <= window.innerHeight + 200
 
               return (
                 <motion.div
@@ -385,7 +395,7 @@ export function ScrollLandingPage({ onNavigate }: ScrollLandingPageProps) {
             <p className="text-xl text-slate-600">Trusted by teams around the world</p>
           </div>
 
-          <StickyTestimonials refs={testimonialRefs} />
+          <StickyTestimonials refs={testimonialRefs} isClient={isClient} />
         </div>
       </section>
 
@@ -408,6 +418,11 @@ export function ScrollLandingPage({ onNavigate }: ScrollLandingPageProps) {
 // Horizontal Timeline Component
 function HorizontalTimeline() {
   const { containerRef, scrollX } = useHorizontalScroll()
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   const milestones = [
     { year: "2020", title: "Company Founded", description: "Started with a vision to transform development" },
@@ -424,7 +439,7 @@ function HorizontalTimeline() {
         <div
           className="flex gap-8 transition-transform duration-100 ease-out"
           style={{
-            transform: `translateX(-${scrollX * (milestones.length * 300 - (typeof window !== "undefined" ? window.innerWidth : 1440))}px)`,
+            transform: `translateX(-${scrollX * (milestones.length * 300 - (isClient ? window.innerWidth : 1440))}px)`,
             width: `${milestones.length * 300}px`,
           }}
         >
@@ -447,7 +462,7 @@ function HorizontalTimeline() {
 }
 
 // Sticky Testimonials Component
-function StickyTestimonials({ refs }: { refs: React.RefObject<HTMLDivElement>[] }) {
+function StickyTestimonials({ refs, isClient }: { refs: React.RefObject<HTMLDivElement>[]; isClient: boolean }) {
   const testimonials = [
     {
       name: "Sarah Chen",
@@ -473,7 +488,7 @@ function StickyTestimonials({ refs }: { refs: React.RefObject<HTMLDivElement>[] 
   return (
     <div className="space-y-8">
       {testimonials.map((testimonial, index) => {
-        const isVisible = refs[index].current?.getBoundingClientRect().top <= window.innerHeight + 200
+        const isVisible = isClient && refs[index].current?.getBoundingClientRect().top <= window.innerHeight + 200
 
         return (
           <motion.div
