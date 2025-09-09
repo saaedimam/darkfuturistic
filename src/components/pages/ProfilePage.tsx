@@ -34,8 +34,8 @@ export function ProfilePage() {
             <div className="text-center">
               <div className="relative w-32 h-32 mx-auto mb-6">
                 <img
-                  src="/professional-profile-photo-of-software-developer.jpg"
-                  alt="Profile"
+                  src="/profile.png"
+                  alt="Saaed Imam - StitchOS Co-Founder"
                   className="w-full h-full rounded-full object-cover border-4 border-[#00BFA6]/30"
                 />
                 <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-br from-[#00BFA6] to-[#FF7F3F] rounded-full flex items-center justify-center">
