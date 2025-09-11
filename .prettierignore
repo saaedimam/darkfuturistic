@@ -1,0 +1,7 @@
+node_modules
+.next
+pnpm-lock.yaml
+coverage
+e2e-results
+playwright-report
+lighthouseci
