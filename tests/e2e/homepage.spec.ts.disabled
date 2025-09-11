@@ -1,0 +1,99 @@
+import { test, expect } from '@playwright/test'
+
+test.describe('Homepage', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/')
+  })
+
+  test('should load the homepage successfully', async ({ page }) => {
+    // Check that the page loads
+    await expect(page).toHaveTitle(/Build the Future with Modern SaaS/)
+    
+    // Check hero section
+    await expect(page.getByRole('heading', { name: /Build the Future with Modern SaaS/ })).toBeVisible()
+    await expect(page.getByText(/Transform your business/)).toBeVisible()
+    
+    // Check CTA buttons
+    await expect(page.getByRole('link', { name: 'Get Started' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Watch Demo' })).toBeVisible()
+  })
+
+  test('should have proper navigation', async ({ page }) => {
+    // Check header navigation
+    await expect(page.getByRole('banner')).toBeVisible()
+    await expect(page.getByText('Features')).toBeVisible()
+    await expect(page.getByText('Pricing')).toBeVisible()
+    await expect(page.getByText('Blog')).toBeVisible()
+    
+    // Test navigation
+    await page.getByText('Blog').click()
+    await expect(page).toHaveURL('/blog')
+  })
+
+  test('should display all main sections', async ({ page }) => {
+    // Features section
+    await expect(page.getByText('Everything you need to succeed')).toBeVisible()
+    
+    // Pricing section
+    await expect(page.getByText('Choose the perfect plan')).toBeVisible()
+    
+    // Testimonials section
+    await expect(page.getByText('Loved by thousands of customers')).toBeVisible()
+    
+    // FAQ section
+    await expect(page.getByText('Frequently asked questions')).toBeVisible()
+    
+    // Footer
+    await expect(page.getByRole('contentinfo')).toBeVisible()
+  })
+
+  test('should be responsive', async ({ page }) => {
+    // Test mobile viewport
+    await page.setViewportSize({ width: 375, height: 667 })
+    await expect(page.getByRole('heading', { name: /Build the Future with Modern SaaS/ })).toBeVisible()
+    
+    // Test tablet viewport
+    await page.setViewportSize({ width: 768, height: 1024 })
+    await expect(page.getByRole('heading', { name: /Build the Future with Modern SaaS/ })).toBeVisible()
+    
+    // Test desktop viewport
+    await page.setViewportSize({ width: 1200, height: 800 })
+    await expect(page.getByRole('heading', { name: /Build the Future with Modern SaaS/ })).toBeVisible()
+  })
+
+  test('should meet core web vitals', async ({ page }) => {
+    // Navigate to page and wait for load
+    const response = await page.goto('/')
+    expect(response?.status()).toBe(200)
+    
+    // Check that LCP element is visible (hero image or heading)
+    await expect(page.getByRole('heading', { name: /Build the Future with Modern SaaS/ })).toBeVisible()
+    
+    // Test interactivity (FID simulation)
+    await page.getByRole('link', { name: 'Get Started' }).hover()
+    
+    // Check for layout shifts by testing element positions
+    const heroSection = page.getByRole('region').first()
+    await expect(heroSection).toBeVisible()
+  })
+
+  test('should have proper accessibility', async ({ page }) => {
+    // Check for proper heading hierarchy
+    const h1 = page.getByRole('heading', { level: 1 })
+    await expect(h1).toBeVisible()
+    
+    // Check for proper landmarks
+    await expect(page.getByRole('banner')).toBeVisible() // Header
+    await expect(page.getByRole('main')).toBeVisible() // Main content
+    await expect(page.getByRole('contentinfo')).toBeVisible() // Footer
+    
+    // Check for proper link text
+    const links = page.getByRole('link')
+    const linkCount = await links.count()
+    expect(linkCount).toBeGreaterThan(0)
+    
+    // Test keyboard navigation
+    await page.keyboard.press('Tab')
+    await expect(page.locator(':focus')).toBeVisible()
+  })
+})

@@ -4,7 +4,8 @@ import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
-import { SmoothScrollProvider } from "../src/components/SmoothScrollProvider"
+import { ThemeProvider } from "@/components/theme-provider"
+import { Header } from "@/components/header"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -67,9 +68,17 @@ export default function RootLayout({
         <meta name="theme-color" content="#0B1F3A" />
       </head>
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} antialiased`}>
-        <SmoothScrollProvider>
-          <Suspense fallback={null}>{children}</Suspense>
-        </SmoothScrollProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Header />
+          <main>
+            <Suspense fallback={null}>{children}</Suspense>
+          </main>
+        </ThemeProvider>
         <Analytics />
       </body>
     </html>
