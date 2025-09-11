@@ -1,0 +1,11 @@
+{
+  "defaults": {
+    "standard": "WCAG2AA",
+    "screenCapture": ".pa11y/screenshot.png",
+    "runners": ["axe"]
+  },
+  "urls": [
+    "http://localhost:3000/"
+  ]
+}
+

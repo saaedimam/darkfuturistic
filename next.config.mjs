@@ -1,13 +1,18 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: true,
+  poweredByHeader: false,
+  compress: true,
   eslint: {
-    ignoreDuringBuilds: true,
+    // Enforce linting during builds
+    ignoreDuringBuilds: false,
   },
   typescript: {
-    ignoreBuildErrors: true,
+    // Enforce type-checking during builds
+    ignoreBuildErrors: false,
   },
   images: {
-    unoptimized: true,
+    formats: ["image/avif", "image/webp"],
   },
 }
 
