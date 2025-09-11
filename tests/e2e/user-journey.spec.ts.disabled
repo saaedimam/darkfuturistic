@@ -1,0 +1,152 @@
+import { test, expect } from '@playwright/test'
+
+test.describe('User Journey: Home to Contact Form', () => {
+  test('should navigate from home to contact and submit form', async ({ page }) => {
+    // Start on homepage
+    await page.goto('/')
+    
+    // Verify homepage loads correctly
+    await expect(page).toHaveTitle(/Build the Future with Modern SaaS/)
+    await expect(page.getByRole('heading', { name: /Build the Future with Modern SaaS/ })).toBeVisible()
+    
+    // Navigate to contact page via header
+    await page.getByRole('link', { name: 'Contact' }).click()
+    await expect(page).toHaveURL('/contact')
+    
+    // Verify contact page loads
+    await expect(page.getByRole('heading', { name: /Let's start a conversation/ })).toBeVisible()
+    
+    // Fill out the contact form
+    await page.getByLabel('Name *').fill('John Doe')
+    await page.getByLabel('Email *').fill('john.doe@example.com')
+    await page.getByLabel('Company').fill('Test Company')
+    await page.getByLabel('Subject *').fill('Test Inquiry')
+    await page.getByLabel('Message *').fill('This is a test message for the contact form validation.')
+    
+    // Submit the form
+    await page.getByRole('button', { name: /send message/i }).click()
+    
+    // Wait for submission to complete and verify success message
+    await expect(page.getByText(/message sent successfully/i)).toBeVisible({ timeout: 10000 })
+    await expect(page.getByText(/we'll get back to you within 24 hours/i)).toBeVisible()
+    
+    // Verify form was reset
+    await expect(page.getByLabel('Name *')).toHaveValue('')
+    await expect(page.getByLabel('Email *')).toHaveValue('')
+  })
+
+  test('should show validation errors for empty form submission', async ({ page }) => {
+    await page.goto('/contact')
+    
+    // Try to submit empty form
+    await page.getByRole('button', { name: /send message/i }).click()
+    
+    // Check for validation errors
+    await expect(page.getByText(/name must be at least 2 characters/i)).toBeVisible()
+    await expect(page.getByText(/please enter a valid email address/i)).toBeVisible()
+    await expect(page.getByText(/subject must be at least 5 characters/i)).toBeVisible()
+    await expect(page.getByText(/message must be at least 10 characters/i)).toBeVisible()
+  })
+
+  test('should validate email format', async ({ page }) => {
+    await page.goto('/contact')
+    
+    // Enter invalid email
+    await page.getByLabel('Email *').fill('invalid-email')
+    await page.getByLabel('Name *').click() // Trigger blur
+    
+    // Check for email validation error
+    await expect(page.getByText(/please enter a valid email address/i)).toBeVisible()
+  })
+
+  test('should be keyboard accessible', async ({ page }) => {
+    await page.goto('/contact')
+    
+    // Tab through form fields
+    await page.keyboard.press('Tab') // Skip to main content
+    
+    // Should be able to navigate through all form fields
+    const nameInput = page.getByLabel('Name *')
+    const emailInput = page.getByLabel('Email *')
+    const companyInput = page.getByLabel('Company')
+    const subjectInput = page.getByLabel('Subject *')
+    const messageInput = page.getByLabel('Message *')
+    const submitButton = page.getByRole('button', { name: /send message/i })
+    
+    // Focus should move through form fields
+    await nameInput.focus()
+    await expect(nameInput).toBeFocused()
+    
+    await page.keyboard.press('Tab')
+    await expect(emailInput).toBeFocused()
+    
+    await page.keyboard.press('Tab')
+    await expect(companyInput).toBeFocused()
+    
+    await page.keyboard.press('Tab')
+    await expect(subjectInput).toBeFocused()
+    
+    await page.keyboard.press('Tab')
+    await expect(messageInput).toBeFocused()
+    
+    await page.keyboard.press('Tab')
+    await expect(submitButton).toBeFocused()
+  })
+
+  test('should navigate between pages correctly', async ({ page }) => {
+    // Start on homepage
+    await page.goto('/')
+    
+    // Navigate to About page
+    await page.getByRole('link', { name: 'About' }).click()
+    await expect(page).toHaveURL('/about')
+    await expect(page.getByRole('heading', { name: /Building the future with purpose/ })).toBeVisible()
+    
+    // Navigate to Blog page
+    await page.getByRole('link', { name: 'Blog' }).click()
+    await expect(page).toHaveURL('/blog')
+    await expect(page.getByRole('heading', { name: /Our Blog/ })).toBeVisible()
+    
+    // Navigate back to home via logo
+    await page.getByLabel('Home').click()
+    await expect(page).toHaveURL('/')
+  })
+
+  test('should handle 404 page correctly', async ({ page }) => {
+    // Navigate to non-existent page
+    await page.goto('/non-existent-page')
+    
+    // Should show 404 page
+    await expect(page.getByText('404')).toBeVisible()
+    await expect(page.getByText('Page not found')).toBeVisible()
+    
+    // Should be able to navigate back to home
+    await page.getByRole('link', { name: /back to home/i }).click()
+    await expect(page).toHaveURL('/')
+  })
+
+  test('should have proper responsive design', async ({ page }) => {
+    // Test mobile viewport
+    await page.setViewportSize({ width: 375, height: 667 })
+    await page.goto('/')
+    
+    // Hero should be visible on mobile
+    await expect(page.getByRole('heading', { name: /Build the Future with Modern SaaS/ })).toBeVisible()
+    
+    // Mobile menu should work
+    const mobileMenuButton = page.getByLabel('Toggle navigation menu')
+    await expect(mobileMenuButton).toBeVisible()
+    await mobileMenuButton.click()
+    
+    // Mobile navigation should be visible
+    await expect(page.getByRole('navigation').nth(1)).toBeVisible()
+    
+    // Test tablet viewport
+    await page.setViewportSize({ width: 768, height: 1024 })
+    await expect(page.getByRole('heading', { name: /Build the Future with Modern SaaS/ })).toBeVisible()
+    
+    // Test desktop viewport
+    await page.setViewportSize({ width: 1200, height: 800 })
+    await expect(page.getByRole('heading', { name: /Build the Future with Modern SaaS/ })).toBeVisible()
+  })
+})

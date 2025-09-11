@@ -3,19 +3,30 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "next build",
     "dev": "next dev",
-    "lint": "next lint",
+    "build": "next build",
     "start": "next start",
-    "test": "vitest",
-    "test:watch": "vitest --watch",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",
     "a11y": "node scripts/a11y.js",
     "lh": "node scripts/lighthouse.js",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,css,md}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "@emotion/is-prop-valid": "latest",
@@ -101,8 +112,10 @@
     "@vitejs/plugin-react": "^5.0.2",
     "chrome-launcher": "^1.2.0",
     "eslint-config-prettier": "^10.1.8",
+    "husky": "^9.1.7",
     "jsdom": "^26.1.0",
     "lighthouse": "^12.8.2",
+    "lint-staged": "^16.1.6",
     "pa11y": "^9.0.0",
     "postcss": "^8.5",
     "prettier": "^3.6.2",

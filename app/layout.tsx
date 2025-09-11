@@ -9,36 +9,43 @@ import { Header } from "@/components/header"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "StitchOS - Industrial Textile Software Platform",
+  title: {
+    default: "Modern SaaS Platform - Build the Future",
+    template: "%s | Modern SaaS Platform"
+  },
   description:
-    "Premium SaaS platform for textile manufacturing: RFID tracking, production analytics, and industrial automation. Built for the future of textile operations.",
-  generator: "v0.app",
+    "Transform your business with our cutting-edge platform designed for scale, performance, and user experience. Built with the latest technologies and best practices.",
   keywords: [
-    "Textile Software",
-    "RFID Tracking",
-    "Manufacturing Analytics",
-    "Industrial SaaS",
-    "Production Management",
+    "SaaS Platform",
+    "Business Software",
+    "Modern Technology",
+    "Scalable Solutions",
+    "User Experience",
   ],
-  authors: [{ name: "StitchOS Team" }],
+  authors: [{ name: "Modern SaaS Team" }],
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   openGraph: {
-    title: "StitchOS - Industrial Textile Software Platform",
-    description: "Premium SaaS platform for textile manufacturing with RFID tracking and production analytics.",
+    title: "Modern SaaS Platform - Build the Future",
+    description: "Transform your business with our cutting-edge platform designed for scale, performance, and user experience.",
     type: "website",
+    locale: "en_US",
+    url: "/",
+    siteName: "Modern SaaS Platform",
     images: [
       {
-        url: "/assets/og-default.webp",
+        url: "/og-default.jpg",
         width: 1200,
         height: 630,
-        alt: "StitchOS Platform",
+        alt: "Modern SaaS Platform",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "StitchOS - Industrial Textile Software Platform",
-    description: "Premium SaaS platform for textile manufacturing with RFID tracking and production analytics.",
-    images: ["/assets/og-default.webp"],
+    title: "Modern SaaS Platform - Build the Future",
+    description: "Transform your business with our cutting-edge platform designed for scale, performance, and user experience.",
+    creator: "@modernsaas",
+    images: ["/og-default.jpg"],
   },
   robots: {
     index: true,
