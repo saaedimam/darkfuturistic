@@ -28,3 +28,30 @@ Continue building your app on:
 2. Deploy your chats from the v0 interface
 3. Changes are automatically pushed to this repository
 4. Vercel deploys the latest version from this repository
+
+## Hidden Header & Smooth Scroll
+
+This project includes an additive, hidden-by-default navigation and smooth scrolling system.
+
+- Files live under `components/nav`, `lib/scroll`, and `styles/nav`.
+- No existing layout was modified; one provider import wires the feature.
+
+### Configure
+Edit `components/nav/config.ts`:
+- `overlay.variant`: `"fullscreen" | "drawer"` (fullscreen default)
+- `menuButton.position`: `"top-right" | "top-left" | "bottom-right" | "bottom-left"`
+- `smoothScroll`: `enabled`, `offset`, `duration`, `easing`
+- `links`: array of `{ label, href }`
+
+### Usage
+Already wired in `app/layout.tsx` via `NavProvider`. A floating menu button appears; clicking opens a full-screen overlay with large tap targets.
+
+### Accessibility
+- `MenuButton` uses `aria-expanded`, `aria-controls`.
+- Overlay uses `role="dialog"` and `aria-modal`.
+- Focus is trapped while open; ESC, backdrop, or link click closes it.
+- Respects `prefers-reduced-motion`.
+
+### Remove
+- Delete `components/nav`, `lib/scroll/smooth.ts`, `styles/nav`.
+- Remove `NavProvider` import and wrapper from `app/layout.tsx`.
