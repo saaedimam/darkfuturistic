@@ -1,0 +1,116 @@
+import { test, expect } from '@playwright/test'
+
+test.describe('Header Component', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/')
+  })
+
+  test('should render header with logo and navigation', async ({ page }) => {
+    // Check logo
+    await expect(page.getByLabel('Home')).toBeVisible()
+    await expect(page.getByText('Brand')).toBeVisible()
+
+    // Check navigation items
+    await expect(page.getByText('Features')).toBeVisible()
+    await expect(page.getByText('Pricing')).toBeVisible()
+    await expect(page.getByText('Blog')).toBeVisible()
+    await expect(page.getByText('Contact')).toBeVisible()
+  })
+
+  test('should toggle mobile menu', async ({ page }) => {
+    // Resize to mobile viewport
+    await page.setViewportSize({ width: 375, height: 667 })
+
+    const menuButton = page.getByLabel('Toggle navigation menu')
+    await expect(menuButton).toBeVisible()
+
+    // Open menu
+    await menuButton.click()
+    await expect(page.getByRole('navigation').nth(1)).toBeVisible()
+
+    // Close menu
+    await menuButton.click()
+    await expect(page.getByRole('navigation').nth(1)).not.toBeVisible()
+  })
+
+  test('should close mobile menu with escape key', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 })
+
+    const menuButton = page.getByLabel('Toggle navigation menu')
+    await menuButton.click()
+    await expect(page.getByRole('navigation').nth(1)).toBeVisible()
+
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('navigation').nth(1)).not.toBeVisible()
+  })
+
+  test('should toggle dark mode', async ({ page }) => {
+    const themeButton = page.getByLabel(/Switch to .* mode/)
+    await themeButton.click()
+
+    // Check if dark mode is applied
+    await expect(page.locator('html')).toHaveClass(/dark/)
+  })
+
+  test('should navigate between pages', async ({ page }) => {
+    await page.getByText('Features').click()
+    await expect(page).toHaveURL('/features')
+
+    await page.getByText('Pricing').click()
+    await expect(page).toHaveURL('/pricing')
+  })
+
+  test('should show active state for current page', async ({ page }) => {
+    await page.goto('/pricing')
+    
+    const pricingLink = page.getByText('Pricing').first()
+    await expect(pricingLink).toHaveAttribute('aria-current', 'page')
+  })
+
+  test('should be keyboard accessible', async ({ page }) => {
+    // Tab through navigation
+    await page.keyboard.press('Tab') // Logo
+    await page.keyboard.press('Tab') // Features
+    await page.keyboard.press('Tab') // Pricing
+    await page.keyboard.press('Tab') // Blog
+    await page.keyboard.press('Tab') // Contact
+    await page.keyboard.press('Tab') // Theme toggle
+    await page.keyboard.press('Tab') // Get Started button
+
+    // Test Enter key navigation
+    await page.keyboard.press('Shift+Tab') // Back to theme toggle
+    await page.keyboard.press('Enter')
+    
+    // Should toggle theme
+    await expect(page.locator('html')).toHaveClass(/dark/)
+  })
+
+  test('should show backdrop blur on scroll', async ({ page }) => {
+    // Add some content to make page scrollable
+    await page.addStyleTag({
+      content: 'body::after { content: ""; display: block; height: 200vh; }'
+    })
+
+    const header = page.locator('header')
+    
+    // Initially no backdrop blur
+    await expect(header).not.toHaveClass(/backdrop-blur/)
+    
+    // Scroll down
+    await page.evaluate(() => window.scrollTo(0, 100))
+    
+    // Should have backdrop blur
+    await expect(header).toHaveClass(/backdrop-blur/)
+  })
+
+  test('should meet accessibility standards', async ({ page }) => {
+    // Check for proper ARIA attributes
+    await expect(page.getByLabel('Home')).toBeVisible()
+    await expect(page.getByLabel('Toggle navigation menu')).toHaveAttribute('aria-expanded')
+    await expect(page.getByLabel(/Switch to .* mode/)).toBeVisible()
+
+    // Check navigation landmarks
+    await expect(page.getByRole('banner')).toBeVisible()
+    await expect(page.getByRole('navigation')).toBeVisible()
+  })
+})
