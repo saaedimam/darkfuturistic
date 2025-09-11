@@ -4,40 +4,43 @@ import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
+import { ThemeProvider } from "../components/theme-provider"
+import { Header } from "../src/components/layout/Header"
 import { SmoothScrollProvider } from "../src/components/SmoothScrollProvider"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "StitchOS - Industrial Textile Software Platform",
+  title: "Lumina - Modern SaaS Platform",
   description:
-    "Premium SaaS platform for textile manufacturing: RFID tracking, production analytics, and industrial automation. Built for the future of textile operations.",
-  generator: "v0.app",
+    "A production-grade Next.js SaaS platform with modern design, accessibility, and performance. Built with TypeScript, Tailwind CSS, and shadcn/ui.",
+  generator: "Next.js",
   keywords: [
-    "Textile Software",
-    "RFID Tracking",
-    "Manufacturing Analytics",
-    "Industrial SaaS",
-    "Production Management",
+    "SaaS Platform",
+    "Next.js",
+    "TypeScript",
+    "Tailwind CSS",
+    "Accessibility",
+    "Performance",
   ],
-  authors: [{ name: "StitchOS Team" }],
+  authors: [{ name: "Lumina Team" }],
   openGraph: {
-    title: "StitchOS - Industrial Textile Software Platform",
-    description: "Premium SaaS platform for textile manufacturing with RFID tracking and production analytics.",
+    title: "Lumina - Modern SaaS Platform",
+    description: "A production-grade Next.js SaaS platform with modern design, accessibility, and performance.",
     type: "website",
     images: [
       {
-        url: "/assets/og-default.webp",
+        url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "StitchOS Platform",
+        alt: "Lumina Platform",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "StitchOS - Industrial Textile Software Platform",
-    description: "Premium SaaS platform for textile manufacturing with RFID tracking and production analytics.",
-    images: ["/assets/og-default.webp"],
+    title: "Lumina - Modern SaaS Platform",
+    description: "A production-grade Next.js SaaS platform with modern design, accessibility, and performance.",
+    images: ["/og-image.png"],
   },
   robots: {
     index: true,
@@ -67,9 +70,19 @@ export default function RootLayout({
         <meta name="theme-color" content="#0B1F3A" />
       </head>
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} antialiased`}>
-        <SmoothScrollProvider>
-          <Suspense fallback={null}>{children}</Suspense>
-        </SmoothScrollProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <SmoothScrollProvider>
+            <Header />
+            <main id="main-content" className="min-h-screen">
+              <Suspense fallback={null}>{children}</Suspense>
+            </main>
+          </SmoothScrollProvider>
+        </ThemeProvider>
         <Analytics />
       </body>
     </html>
