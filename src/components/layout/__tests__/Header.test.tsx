@@ -1,14 +1,15 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { ThemeProvider } from 'next-themes'
+import { vi } from 'vitest'
 import { Header } from '../Header'
 
 // Mock next/navigation
-jest.mock('next/navigation', () => ({
+vi.mock('next/navigation', () => ({
   usePathname: () => '/',
 }))
 
 // Mock framer-motion
-jest.mock('framer-motion', () => ({
+vi.mock('framer-motion', () => ({
   motion: {
     header: ({ children, ...props }: any) => <header {...props}>{children}</header>,
     div: ({ children, ...props }: any) => <div {...props}>{children}</div>,

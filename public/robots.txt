@@ -1,4 +1,16 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://your-domain.com/sitemap.xml
+# Sitemap
+Sitemap: https://ioriimasu.com/sitemap.xml
+
+# Disallow admin and API routes
+Disallow: /api/
+Disallow: /_next/
+Disallow: /admin/
+Disallow: /private/
+
+# Allow all other content
+Allow: /blog/
+Allow: /about
+Allow: /contact

@@ -5,41 +5,43 @@ import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import { ThemeProvider } from "../components/theme-provider"
-import { Header } from "../src/components/layout/Header"
+import { NavProvider } from "../components/nav/NavProvider"
+import { Footer } from "../src/components/layout/Footer"
 import { SmoothScrollProvider } from "../src/components/SmoothScrollProvider"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "Lumina - Modern SaaS Platform",
+  title: "ioriimasu - Modern Web Platform",
   description:
-    "A production-grade Next.js SaaS platform with modern design, accessibility, and performance. Built with TypeScript, Tailwind CSS, and shadcn/ui.",
+    "A modern, production-ready website built with Next.js, TypeScript, and Tailwind CSS. Featuring accessibility, performance optimization, and beautiful design.",
   generator: "Next.js",
   keywords: [
-    "SaaS Platform",
+    "Web Development",
     "Next.js",
     "TypeScript",
     "Tailwind CSS",
     "Accessibility",
     "Performance",
+    "Modern Web",
   ],
-  authors: [{ name: "Lumina Team" }],
+  authors: [{ name: "ioriimasu Team" }],
   openGraph: {
-    title: "Lumina - Modern SaaS Platform",
-    description: "A production-grade Next.js SaaS platform with modern design, accessibility, and performance.",
+    title: "ioriimasu - Modern Web Platform",
+    description: "A modern, production-ready website built with Next.js, TypeScript, and Tailwind CSS.",
     type: "website",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Lumina Platform",
+        alt: "ioriimasu Platform",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Lumina - Modern SaaS Platform",
-    description: "A production-grade Next.js SaaS platform with modern design, accessibility, and performance.",
+    title: "ioriimasu - Modern Web Platform",
+    description: "A modern, production-ready website built with Next.js, TypeScript, and Tailwind CSS.",
     images: ["/og-image.png"],
   },
   robots: {
@@ -77,10 +79,11 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <SmoothScrollProvider>
-            <Header />
+            <NavProvider />
             <main id="main-content" className="min-h-screen">
               <Suspense fallback={null}>{children}</Suspense>
             </main>
+            <Footer />
           </SmoothScrollProvider>
         </ThemeProvider>
         <Analytics />
