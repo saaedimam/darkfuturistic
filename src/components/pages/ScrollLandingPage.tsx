@@ -259,8 +259,9 @@ export function ScrollLandingPage({ onNavigate }: ScrollLandingPageProps) {
               },
               { icon: Target, title: "Precision Tools", description: "Purpose-built tools for maximum productivity" },
             ].map((feature, index) => {
+              const element = featureRefs[index]?.current
               const isVisible =
-                isClient && featureRefs[index].current?.getBoundingClientRect().top <= window.innerHeight + 200
+                isClient && element && element.getBoundingClientRect().top <= window.innerHeight + 200
 
               return (
                 <motion.div

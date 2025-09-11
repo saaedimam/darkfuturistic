@@ -23,7 +23,7 @@ export function ParticleBackground({
   connectionDistance = 100,
 }: ParticleBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const animationFrameRef = useRef<number>()
+  const animationFrameRef = useRef<number | undefined>(undefined)
   const particlesRef = useRef<Particle[]>([])
   const [isClient, setIsClient] = useState(false)
 
