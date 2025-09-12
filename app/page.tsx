@@ -1,54 +1,74 @@
-"use client"
+import HeroFuturistic from '@/components/hero-futuristic'
+import { Features } from '@/components/sections/features'
+import { Logos } from '@/components/sections/logos'
+import { Pricing } from '@/components/sections/pricing'
+import { Testimonials } from '@/components/sections/testimonials'
+import { FAQ } from '@/components/sections/faq'
+import { CTA } from '@/components/sections/cta'
+import { Footer } from '@/components/footer'
+import { heroFromCms, heroFromLocal, type CmsHero, type LocalHeroData } from '@/lib/adapters/hero'
+import heroJson from '@/data/hero.json'
 
-import { useState } from "react"
-import { Navigation } from "../src/components/Navigation"
-import { HeroPage } from "../src/components/pages/HeroPage"
-import { ScrollLandingPage } from "../src/components/pages/ScrollLandingPage"
-import { ProfilePage } from "../src/components/pages/ProfilePage"
-import { StitchOSPage } from "../src/components/pages/StitchOSPage"
-import { KattaliPage } from "../src/components/pages/KattaliPage"
-import { ProjectsPage } from "../src/components/pages/ProjectsPage"
-import { ContactPage } from "../src/components/pages/ContactPage"
-
-export default function HomePage() {
-  const [currentPage, setCurrentPage] = useState("hero")
-
-  // Handle navigation from scroll demo back to main app
-  const handleScrollDemoNavigation = (page: string) => {
-    setCurrentPage(page)
-  }
-
-  const renderPage = () => {
-    switch (currentPage) {
-      case "hero":
-        return <HeroPage />
-      case "scroll-demo":
-        return <ScrollLandingPage />
-      case "about":
-        return <ProfilePage />
-      case "stitchos":
-        return <StitchOSPage />
-      case "kattali":
-        return <KattaliPage />
-      case "projects":
-        return <ProjectsPage />
-      case "contact":
-        return <ContactPage />
-      default:
-        return <HeroPage />
+// Fetch hero data from API (CMS-like)
+async function getHeroFromApi(): Promise<CmsHero> {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/hero`, {
+      cache: 'no-store', // Always get fresh data
+      next: { revalidate: 3600 } // Revalidate every hour in production
+    })
+    
+    if (!res.ok) {
+      throw new Error(`Failed to fetch hero data: ${res.status}`)
+    }
+    
+    return res.json()
+  } catch (error) {
+    console.error('Failed to load hero from API, falling back to local data:', error)
+    // Fallback to local data if API fails
+    return {
+      headline: heroJson.title,
+      description: heroJson.subtitle,
+      eyebrow: heroJson.kicker,
+      ctas: {
+        primaryLabel: heroJson.primaryButton?.text,
+        primaryHref: heroJson.primaryButton?.url,
+        secondaryLabel: heroJson.secondaryButton?.text,
+        secondaryHref: heroJson.secondaryButton?.url,
+      },
+      media: heroJson.image ? {
+        kind: 'image' as const,
+        url: heroJson.image.src,
+        alt: heroJson.image.alt,
+        width: heroJson.image.width,
+        height: heroJson.image.height,
+      } : undefined,
+      bullets: heroJson.highlights?.map(h => h.text) || [],
+      socialProof: {
+        userCount: heroJson.highlights?.find(h => h.count)?.count,
+        rating: heroJson.highlights?.find(h => h.text.includes('rating'))?.count,
+      }
     }
   }
+}
+
+export default async function HomePage() {
+  // Option 1: Fetch from API/CMS
+  const cmsHeroData = await getHeroFromApi()
+  const heroFromAPI = heroFromCms(cmsHeroData)
+
+  // Option 2: Use local JSON (comment out API version above and uncomment this)
+  // const heroFromJSON = heroFromLocal(heroJson as LocalHeroData)
 
   return (
-    <div className="min-h-screen bg-slate-900 font-inter">
-      {currentPage === "scroll-demo" ? (
-        <ScrollLandingPage onNavigate={handleScrollDemoNavigation} />
-      ) : (
-        <>
-          <Navigation currentPage={currentPage} setCurrentPage={setCurrentPage} />
-          {renderPage()}
-        </>
-      )}
+    <div className="min-h-screen">
+      <HeroFuturistic {...heroFromAPI} />
+      <Logos />
+      <Features />
+      <Pricing />
+      <Testimonials />
+      <FAQ />
+      <CTA />
+      <Footer />
     </div>
   )
 }

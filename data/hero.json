@@ -1,0 +1,33 @@
+{
+  "kicker": "Trusted by 10,000+ teams worldwide",
+  "title": "Build the Future with Modern SaaS",
+  "subtitle": "Transform your business with our cutting-edge platform designed for scale, performance, and user experience. Built with the latest technologies and best practices.",
+  "primaryButton": {
+    "text": "Get Started Free",
+    "url": "/signup"
+  },
+  "secondaryButton": {
+    "text": "Watch Demo",
+    "url": "/demo"
+  },
+  "image": {
+    "src": "/placeholder.jpg",
+    "alt": "Modern SaaS platform dashboard showing analytics and user interface",
+    "width": 800,
+    "height": 600
+  },
+  "highlights": [
+    {
+      "count": "10k+",
+      "text": "active users"
+    },
+    {
+      "count": "4.9/5",
+      "text": "user rating"
+    },
+    {
+      "text": "99.9% uptime guaranteed"
+    }
+  ],
+  "backgroundGradient": true
+}

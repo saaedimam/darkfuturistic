@@ -1,73 +1,125 @@
-type Options = { offset?: number; duration?: number; easing?: 'easeOutCubic' | 'linear' }
-
-const easings = {
-  easeOutCubic: (t: number) => 1 - Math.pow(1 - t, 3),
-  linear: (t: number) => t,
+interface SmoothScrollOptions {
+  offset?: number
+  duration?: number
+  easing?: 'easeOutCubic' | 'easeInOutCubic' | 'easeOutQuart'
 }
 
-export function initSmoothScroll({ offset = 0, duration = 700, easing = 'easeOutCubic' }: Options = {}) {
-  try {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const reduced = mq && mq.matches
-    const ease = easings[easing] || easings.easeOutCubic
+interface ScrollToOptions extends SmoothScrollOptions {
+  behavior?: 'smooth' | 'auto'
+}
 
-    // Avoid double smoothing with CSS
-    const de = document.documentElement
-    const prevBehavior = de.style.scrollBehavior
-    de.style.scrollBehavior = 'auto'
+// Easing functions
+const easingFunctions = {
+  easeOutCubic: (t: number) => 1 - Math.pow(1 - t, 3),
+  easeInOutCubic: (t: number) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
+  easeOutQuart: (t: number) => 1 - Math.pow(1 - t, 4),
+}
 
-    const scrollToEl = (el: Element) => {
-      const start = window.scrollY
-      const targetTop = (el as HTMLElement).getBoundingClientRect().top + window.scrollY - offset
-      const end = Math.max(0, targetTop)
-      if (reduced) {
-        window.scrollTo({ top: end, behavior: 'auto' })
-        return
-      }
-      const t0 = performance.now()
-      const step = (now: number) => {
-        const p = Math.min(1, (now - t0) / duration)
-        const y = start + (end - start) * ease(p)
-        window.scrollTo(0, y)
-        if (p < 1) requestAnimationFrame(step)
-      }
-      requestAnimationFrame(step)
-    }
+let isInitialized = false
+let prefersReducedMotion = false
 
-    const onClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement | null
-      if (!target) return
-      const anchor = target.closest('a[href^="#"], [data-smooth]') as HTMLAnchorElement | HTMLElement | null
-      if (!anchor) return
-      const href = (anchor as HTMLAnchorElement).getAttribute('href') || ''
-      const id = href.startsWith('#') ? href.slice(1) : ''
-      const el = id ? document.getElementById(id) : null
-      if (el) {
-        e.preventDefault()
-        scrollToEl(el)
-      }
-    }
-
-    document.addEventListener('click', onClick, { capture: true })
-
-    ;(window as any).IORI_SCROLL = {
-      scrollTo: (selectorOrEl: string | Element, opts?: Options) => {
-        const el = typeof selectorOrEl === 'string' ? document.querySelector(selectorOrEl) : selectorOrEl
-        if (el) {
-          const merged = { offset, duration, easing, ...(opts || {}) }
-          initSmoothScroll(merged)
-          scrollToEl(el)
-        }
-      },
-    }
-
-    return () => {
-      de.style.scrollBehavior = prevBehavior
-      document.removeEventListener('click', onClick, { capture: true } as any)
-    }
-  } catch {
-    // no-op in SSR
+// Check for reduced motion preference
+function checkReducedMotion() {
+  if (typeof window !== 'undefined') {
+    prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   }
 }
 
-export default initSmoothScroll
+// Smooth scroll to element
+function scrollToElement(element: Element, options: SmoothScrollOptions = {}) {
+  const { offset = 0, duration = 700, easing = 'easeOutCubic' } = options
+  
+  if (prefersReducedMotion) {
+    // Use native smooth scrolling for reduced motion
+    element.scrollIntoView({ behavior: 'smooth' })
+    return
+  }
+
+  const startY = window.scrollY
+  const targetY = Math.max(0, element.getBoundingClientRect().top + window.scrollY - offset)
+  const distance = targetY - startY
+  
+  if (Math.abs(distance) < 1) return // Already at target
+
+  const startTime = performance.now()
+  const ease = easingFunctions[easing]
+
+  function animate(currentTime: number) {
+    const elapsed = currentTime - startTime
+    const progress = Math.min(elapsed / duration, 1)
+    const easedProgress = ease(progress)
+    
+    window.scrollTo(0, startY + distance * easedProgress)
+    
+    if (progress < 1) {
+      requestAnimationFrame(animate)
+    }
+  }
+
+  requestAnimationFrame(animate)
+}
+
+// Initialize smooth scrolling
+export function initSmoothScroll(options: SmoothScrollOptions = {}) {
+  if (isInitialized) return
+  
+  checkReducedMotion()
+  isInitialized = true
+
+  // Set native scroll behavior to auto to avoid double smoothing
+  if (typeof document !== 'undefined') {
+    document.documentElement.style.scrollBehavior = 'auto'
+  }
+
+  // Handle click events on anchor links and data-smooth elements
+  function handleClick(event: Event) {
+    const target = event.target as HTMLElement
+    const link = target.closest('a[href^="#"], [data-smooth]') as HTMLAnchorElement
+    
+    if (!link) return
+
+    const href = link.getAttribute('href')
+    if (!href || !href.startsWith('#')) return
+
+    const targetId = href.slice(1)
+    const targetElement = document.getElementById(targetId)
+    
+    if (targetElement) {
+      event.preventDefault()
+      scrollToElement(targetElement, options)
+    }
+  }
+
+  // Add event listener
+  if (typeof document !== 'undefined') {
+    document.addEventListener('click', handleClick, { capture: true })
+  }
+
+  // Expose global API
+  if (typeof window !== 'undefined') {
+    ;(window as any).IORI_SCROLL = {
+      scrollTo: (selector: string | Element, scrollOptions?: ScrollToOptions) => {
+        const element = typeof selector === 'string' 
+          ? document.querySelector(selector) 
+          : selector
+        
+        if (element) {
+          scrollToElement(element, { ...options, ...scrollOptions })
+        }
+      },
+      scrollToElement,
+      initSmoothScroll,
+    }
+  }
+}
+
+// Hook for programmatic scrolling
+export function useSmoothScroll() {
+  const scrollTo = (selector: string | Element, scrollOptions?: ScrollToOptions) => {
+    if (typeof window !== 'undefined' && (window as any).IORI_SCROLL) {
+      ;(window as any).IORI_SCROLL.scrollTo(selector, scrollOptions)
+    }
+  }
+
+  return { scrollTo }
+}

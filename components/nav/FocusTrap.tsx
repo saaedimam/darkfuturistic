@@ -1,58 +1,79 @@
-"use client"
+'use client'
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef } from 'react'
 
-export function useDisableBodyScroll(active: boolean) {
-  useEffect(() => {
-    if (!active) return
-    const original = document.body.style.overflow
-    document.body.style.overflow = "hidden"
-    return () => {
-      document.body.style.overflow = original
-    }
-  }, [active])
+interface FocusTrapProps {
+  children: React.ReactNode
+  active: boolean
+  onEscape?: () => void
 }
 
-export function FocusTrap({ active, children }: { active: boolean; children: React.ReactNode }) {
-  const startRef = useRef<HTMLSpanElement>(null)
-  const endRef = useRef<HTMLSpanElement>(null)
+export function FocusTrap({ children, active, onEscape }: FocusTrapProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const previousActiveElement = useRef<Element | null>(null)
 
   useEffect(() => {
     if (!active) return
-    const focusable = () =>
-      Array.from<HTMLElement>(
-        document.querySelectorAll(
-          '#iori-nav a, #iori-nav button, #iori-nav input, #iori-nav textarea, #iori-nav select, #iori-nav [tabindex]:not([tabindex="-1"])',
-        ),
-      ).filter((el) => !el.hasAttribute("disabled") && !el.getAttribute("aria-hidden"))
 
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== "Tab") return
-      const els = focusable()
-      if (els.length === 0) return
-      const first = els[0]
-      const last = els[els.length - 1]
-      const target = document.activeElement as HTMLElement
-      if (e.shiftKey && target === first) {
-        e.preventDefault()
-        last.focus()
-      } else if (!e.shiftKey && target === last) {
-        e.preventDefault()
-        first.focus()
+    // Store the previously focused element
+    previousActiveElement.current = document.activeElement
+
+    // Focus the first focusable element in the trap
+    const focusableElements = containerRef.current?.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    )
+    
+    if (focusableElements && focusableElements.length > 0) {
+      ;(focusableElements[0] as HTMLElement).focus()
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && onEscape) {
+        onEscape()
+        return
+      }
+
+      if (event.key !== 'Tab') return
+
+      const focusableElements = containerRef.current?.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      )
+
+      if (!focusableElements || focusableElements.length === 0) return
+
+      const firstElement = focusableElements[0] as HTMLElement
+      const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement
+
+      if (event.shiftKey) {
+        // Shift + Tab
+        if (document.activeElement === firstElement) {
+          event.preventDefault()
+          lastElement.focus()
+        }
+      } else {
+        // Tab
+        if (document.activeElement === lastElement) {
+          event.preventDefault()
+          firstElement.focus()
+        }
       }
     }
 
-    document.addEventListener("keydown", onKeyDown)
-    return () => document.removeEventListener("keydown", onKeyDown)
-  }, [active])
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      
+      // Restore focus to the previously focused element
+      if (previousActiveElement.current instanceof HTMLElement) {
+        previousActiveElement.current.focus()
+      }
+    }
+  }, [active, onEscape])
 
   return (
-    <>
-      <span tabIndex={0} ref={startRef} className="sr-only" aria-hidden />
+    <div ref={containerRef} tabIndex={-1}>
       {children}
-      <span tabIndex={0} ref={endRef} className="sr-only" aria-hidden />
-    </>
+    </div>
   )
 }
-
-export default FocusTrap

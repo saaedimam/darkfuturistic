@@ -1,104 +1,66 @@
-"use client"
+'use client'
 
-import { useId, useMemo } from "react"
-import { motion, useReducedMotion } from "framer-motion"
-import { navConfig } from "./config"
-import { useNav } from "../../app/(nav)/NavProvider"
+import { useId } from 'react'
+import { motion } from 'framer-motion'
+import { Menu, X } from 'lucide-react'
 
-function positionClass(position: string) {
-  switch (position) {
-    case "top-left":
-      return "top-4 left-4"
-    case "bottom-right":
-      return "bottom-4 right-4"
-    case "bottom-left":
-      return "bottom-4 left-4"
-    default:
-      return "top-4 right-4"
-  }
+interface MenuButtonProps {
+  isOpen: boolean
+  onToggle: () => void
+  className?: string
 }
 
-export function MenuButton() {
+export function MenuButton({ isOpen, onToggle, className = '' }: MenuButtonProps) {
   const id = useId()
-  const { open, setOpen } = useNav()
-  const prefersReducedMotion = useReducedMotion()
-  const size = navConfig.menuButton.size
-  const pos = positionClass(navConfig.menuButton.position)
-
-  const lineVariants = useMemo(
-    () => ({
-      top: {
-        open: { y: 8, rotate: 45 },
-        closed: { y: 0, rotate: 0 },
-      },
-      middle: {
-        open: { opacity: 0 },
-        closed: { opacity: 1 },
-      },
-      bottom: {
-        open: { y: -8, rotate: -45 },
-        closed: { y: 0, rotate: 0 },
-      },
-    }),
-    [],
-  )
+  const buttonId = `menu-${id}`
 
   return (
-    <button
-      id={`menu-${id}`}
+    <motion.button
+      id={buttonId}
       aria-controls="iori-nav"
-      aria-expanded={open}
-      aria-label={open ? "Close menu" : "Open menu"}
-      onClick={() => setOpen(!open)}
-      className={[
-        "fixed z-[100] select-none",
-        pos,
-        "rounded-full shadow-lg ring-1",
-        "bg-[var(--color-card)] text-[var(--color-foreground)]",
-        "ring-[color:var(--color-border)]",
-        "backdrop-blur-md",
-        "focus:outline-none focus-visible:ring-2",
-        "hover:opacity-90 active:opacity-80",
-      ].join(" ")}
-      style={{ width: size, height: size }}
+      aria-expanded={isOpen}
+      aria-label={isOpen ? 'Close menu' : 'Open menu'}
+      onClick={onToggle}
+      className={`fixed top-4 right-4 z-[100] h-14 w-14 rounded-full backdrop-blur-md bg-background/80 shadow-lg ring-1 ring-border hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-all duration-200 ${className}`}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.2, ease: 'easeOut' }}
     >
-      <span className="sr-only">{open ? "Close menu" : "Open menu"}</span>
-      <div
-        aria-hidden
-        className="relative mx-auto"
-        style={{ width: size * 0.5, height: size * 0.5 }}
-      >
-        {prefersReducedMotion ? (
-          <div className={`transition-transform duration-150 ${open ? "rotate-90" : "rotate-0"}`}>
-            <div className="h-[2px] w-full bg-current mb-1.5" />
-            <div className="h-[2px] w-full bg-current mb-1.5" />
-            <div className="h-[2px] w-full bg-current" />
-          </div>
-        ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <motion.span
-              className="block h-[2px] w-6 bg-current rounded"
-              animate={open ? "open" : "closed"}
-              variants={lineVariants.top}
-              transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            />
-            <motion.span
-              className="block h-[2px] w-6 bg-current rounded my-1.5"
-              animate={open ? "open" : "closed"}
-              variants={lineVariants.middle}
-              transition={{ duration: 0.15 }}
-            />
-            <motion.span
-              className="block h-[2px] w-6 bg-current rounded"
-              animate={open ? "open" : "closed"}
-              variants={lineVariants.bottom}
-              transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            />
-          </div>
-        )}
+      <div className="relative w-6 h-6 mx-auto">
+        <motion.div
+          className="absolute inset-0 flex items-center justify-center"
+          animate={isOpen ? { rotate: 45 } : { rotate: 0 }}
+          transition={{ duration: 0.2, ease: 'easeInOut' }}
+        >
+          <motion.div
+            className="w-6 h-0.5 bg-foreground rounded-full"
+            animate={isOpen ? { rotate: 0 } : { rotate: 0 }}
+            transition={{ duration: 0.2, ease: 'easeInOut' }}
+          />
+        </motion.div>
+        
+        <motion.div
+          className="absolute inset-0 flex items-center justify-center"
+          animate={isOpen ? { opacity: 0, y: 0 } : { opacity: 1, y: -6 }}
+          transition={{ duration: 0.2, ease: 'easeInOut' }}
+        >
+          <div className="w-6 h-0.5 bg-foreground rounded-full" />
+        </motion.div>
+        
+        <motion.div
+          className="absolute inset-0 flex items-center justify-center"
+          animate={isOpen ? { opacity: 0, y: 0 } : { opacity: 1, y: 6 }}
+          transition={{ duration: 0.2, ease: 'easeInOut' }}
+        >
+          <div className="w-6 h-0.5 bg-foreground rounded-full" />
+        </motion.div>
       </div>
-    </button>
+      
+      <span className="sr-only">
+        {isOpen ? 'Close navigation menu' : 'Open navigation menu'}
+      </span>
+    </motion.button>
   )
 }
-
-export default MenuButton
