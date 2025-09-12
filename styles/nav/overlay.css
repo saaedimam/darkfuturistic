@@ -1,0 +1,67 @@
+.nav-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+}
+
+/* Hide existing fixed top header without altering components */
+body nav.fixed.top-0.left-0.right-0.z-50 {
+  display: none !important;
+}
+
+.nav-backdrop {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in oklch, var(--color-background), black 25%);
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+}
+
+.nav-panel {
+  position: relative;
+  z-index: 1;
+  max-width: 48rem;
+  width: min(92vw, 48rem);
+  margin: 0 auto;
+  border-radius: var(--radius-xl);
+  padding: 2rem;
+  color: var(--color-foreground);
+  background: color-mix(in oklch, var(--color-card), white 2%);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 10px 30px oklch(0 0 0 / 0.2);
+}
+
+.nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.nav-link {
+  display: block;
+  font-size: var(--text-2xl);
+  line-height: 3.25rem;
+  padding: 0.25rem 0.5rem;
+  color: var(--color-foreground);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  outline: 0;
+}
+
+.nav-link:hover {
+  background: color-mix(in oklch, var(--color-accent), transparent 75%);
+}
+
+.nav-link:focus-visible {
+  box-shadow: 0 0 0 2px var(--color-ring);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-backdrop {
+    backdrop-filter: none;
+  }
+}
